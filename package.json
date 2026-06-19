@@ -1,0 +1,18 @@
+{
+  "name": "counter-stryke",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Counter-Strike 1.6 inspired tactical FPS — web multiplayer",
+  "scripts": {
+    "predev": "lsof -ti:3001 | xargs kill -9 2>/dev/null || true",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npx serve client -l 3000",
+    "start": "npm start --prefix server",
+    "build": "echo 'Client is static — no build step required'",
+    "install:all": "npm install && npm install --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>COUNTER_STRYKE — DE_DUST2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;600;700&family=Hanken+Grotesk:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- MAIN MENU -->
+    <section id="screen-menu" class="screen active">
+      <div class="menu-bg"></div>
+      <header class="top-bar">
+        <div class="top-left">
+          <span class="signal">▮▮▮▯</span>
+          <span class="label-mono">ZONE_ALPHA // SERVER: <span id="server-ip">CONECTANDO...</span></span>
+        </div>
+        <nav class="top-nav">
+          <button class="nav-tab active">HOME</button>
+          <button class="nav-tab">SQUADRON</button>
+          <button class="nav-tab">ARMORY</button>
+          <button class="nav-tab">INTEL</button>
+        </nav>
+        <div class="top-right">
+          <button class="icon-btn btn-settings" type="button" title="Configuración del servidor">⚙</button>
+        </div>
+      </header>
+
+      <div class="menu-body">
+        <div class="menu-left">
+          <h1 class="game-title">CONSOLIDADA<br><span>STRYKE</span></h1>
+          <div class="join-form">
+            <label class="label-mono">OPERATOR ID</label>
+            <input type="text" id="player-name" maxlength="16" placeholder="VALKYRIE_01" value="OPERATOR_01" />
+            <button id="btn-join" class="btn btn-primary">01 — INGRESAR AL SERVIDOR</button>
+          </div>
+          <ul class="menu-list">
+            <li class="menu-item active"><span>01</span> UNIRSE AL COMBATE</li>
+            <li class="menu-item"><span>02</span> SQUAD FINDER</li>
+            <li class="menu-item"><span>03</span> LOADOUT CONFIG</li>
+            <li class="menu-item"><span>04</span> SYSTEM PARAMETERS</li>
+          </ul>
+        </div>
+
+        <div class="menu-right">
+          <div class="radar-widget">
+            <div class="radar-circle">
+              <div class="radar-blip"></div>
+            </div>
+            <span class="label-mono">LOCALIZE_GRID_00</span>
+          </div>
+          <div class="intel-box">
+            <h3>FLASH INTEL</h3>
+            <p>Operación <strong>'Rust'</strong> activa en sector <strong>DE_DUST2</strong>. Máximo 10 operadores por servidor.</p>
+          </div>
+          <div class="status-panel">
+            <div class="status-row"><span class="label-mono">SERVER STATUS</span><span id="server-status" class="value orange">OFFLINE</span></div>
+            <div class="status-row"><span class="label-mono">JUGADORES</span><span id="menu-players" class="value">0 / 10</span></div>
+            <div class="status-row"><span class="label-mono">MAPA</span><span class="value green">DE_DUST2</span></div>
+            <div class="status-row"><span class="label-mono">PING</span><span id="menu-ping" class="value orange">-- MS</span></div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="bottom-bar">
+        <span class="label-mono">NET STATUS: <span id="net-status">STANDBY</span></span>
+        <span class="label-mono">ENGINE BUILD: 1.6.0.4.WEB</span>
+        <span class="label-mono">LOCATION: DE_DUST2 (EU_WEST)</span>
+        <span class="label-mono">© 2024 COUNTER_STRYKE COMMAND</span>
+        <span class="label-mono" id="utc-time"></span>
+      </footer>
+    </section>
+
+    <!-- TEAM SELECT -->
+    <section id="screen-teams" class="screen">
+      <header class="top-bar">
+        <div class="top-left">
+          <span class="label-mono">DE_DUST2 | SERVER: <span id="team-server-ip">192.168.1.1</span></span>
+        </div>
+        <nav class="top-nav">
+          <button class="nav-tab">1. EQUIPMENT</button>
+          <button class="nav-tab active">2. TEAM SELECT</button>
+          <button class="nav-tab">3. RADIO</button>
+        </nav>
+        <div class="top-right"><button class="icon-btn btn-settings" type="button" title="Configuración del servidor">⚙</button></div>
+      </header>
+
+      <div class="team-body">
+        <h2 class="section-title">SELECT YOUR ALLEGIANCE</h2>
+        <p class="section-sub label-mono">MISSION SECTOR: ALPHA-7 // STATUS: <span id="lobby-status">WAITING_OPERATORS</span></p>
+
+        <div class="team-panels">
+          <button class="team-panel terrorist" id="btn-team-t">
+            <div class="team-silhouette t-silhouette" style="background-image: url('assets/terrorist.png')"></div>
+            <div class="team-panel-content">
+              <div class="team-badge orange">1 — TERRORIST</div>
+              <h3>TERRORIST FORCE</h3>
+              <p>Separatistas especializados en sabotaje explosivo y operaciones de alto riesgo.</p>
+              <div class="team-bar"><span class="filled orange" id="t-bar-1"></span><span class="filled orange" id="t-bar-2"></span><span class="filled orange" id="t-bar-3"></span><span id="t-bar-4"></span><span id="t-bar-5"></span></div>
+              <div class="team-count label-mono"><span id="count-t">0</span> / 5</div>
+            </div>
+          </button>
+
+          <button class="team-panel ct" id="btn-team-ct">
+            <div class="team-silhouette ct-silhouette" style="background-image: url('assets/ct.png')"></div>
+            <div class="team-panel-content">
+              <div class="team-badge green">2 — DEFENDER</div>
+              <h3>COUNTER-TERRORIST FORCE</h3>
+              <p>Unidad global de respuesta táctica enfocada en neutralización y preservación de sitios.</p>
+              <div class="team-bar"><span class="filled green" id="ct-bar-1"></span><span class="filled green" id="ct-bar-2"></span><span class="filled green" id="ct-bar-3"></span><span id="ct-bar-4"></span><span id="ct-bar-5"></span></div>
+              <div class="team-count label-mono"><span id="count-ct">0</span> / 5</div>
+            </div>
+          </button>
+        </div>
+
+        <div class="team-actions">
+          <button id="btn-auto-team" class="btn btn-secondary">5 — AUTO-SELECT TEAM</button>
+          <button id="btn-start" class="btn btn-primary" disabled>INICIAR PARTIDA</button>
+        </div>
+
+        <div class="operator-roster" id="operator-roster"></div>
+        <div class="player-list" id="lobby-players"></div>
+      </div>
+
+      <footer class="bottom-bar">
+        <span class="label-mono">CURRENT LOADOUT: DEFAULT MK1</span>
+        <span class="label-mono">SERVER PING: <span id="team-ping">--</span> MS</span>
+        <span class="label-mono">OPERATORS: <span id="team-player-count">0</span> / 10</span>
+      </footer>
+    </section>
+
+    <!-- BUY MENU -->
+    <section id="screen-buy" class="screen">
+      <header class="top-bar">
+        <div class="top-left label-mono">DE_DUST2 | BUY TIME REMAINING: <span id="buy-timer" class="orange">00:15</span></div>
+        <div class="top-right label-mono">FUNDS: $<span id="buy-money">800</span></div>
+      </header>
+      <div class="buy-body">
+        <div class="buy-categories">
+          <div class="buy-cat">
+            <h4>1 — PISTOLS</h4>
+            <button class="buy-item" data-item="deagle">Desert Eagle — $700</button>
+          </div>
+          <div class="buy-cat">
+            <h4>4 — RIFLES</h4>
+            <button class="buy-item terrorist-only" data-item="ak47">AK-47 — $2,700</button>
+            <button class="buy-item ct-only" data-item="m4a1">M4A1-S — $2,900</button>
+          </div>
+          <div class="buy-cat">
+            <h4>5 — EQUIPMENT</h4>
+            <button class="buy-item" data-item="kevlar">Kevlar — $650</button>
+            <button class="buy-item" data-item="kevlar_helmet">Kevlar + Helmet — $1,000</button>
+            <button class="buy-item ct-only" data-item="defuse_kit">Defuse Kit — $400</button>
+          </div>
+        </div>
+        <div class="buy-hint label-mono">Presiona ENTER para comprar seleccionado | ESC para cerrar</div>
+      </div>
+    </section>
+
+    <!-- GAME -->
+    <section id="screen-game" class="screen">
+      <canvas id="game-canvas"></canvas>
+
+      <div class="hud">
+        <div class="hud-top">
+          <div class="hud-radar">
+            <canvas id="radar-canvas" width="120" height="120"></canvas>
+            <span class="label-mono">LOCALIZE_GRID_00</span>
+          </div>
+          <div class="hud-score">
+            <div class="score-team t"><span class="label-mono">T</span> <span id="hud-score-t">00</span></div>
+            <div class="score-center">
+              <div class="timer label-mono">ROUND TIME <span id="hud-timer">01:55</span></div>
+              <div class="round-info label-mono">ROUND <span id="hud-round">1</span>/30 — DE_DUST2</div>
+            </div>
+            <div class="score-team ct"><span id="hud-score-ct">00</span> <span class="label-mono">CT</span></div>
+          </div>
+          <div class="hud-top-right">
+            <button class="icon-btn btn-settings hud-settings" type="button" title="Configuración del servidor">⚙</button>
+            <div class="hud-killfeed" id="killfeed"></div>
+          </div>
+        </div>
+
+        <div class="hud-bomb" id="hud-bomb">
+          <div class="bomb-status label-mono" id="bomb-status">BOMB STATUS: IDLE</div>
+          <div class="bomb-bar"><div class="bomb-fill" id="bomb-bar-fill"></div></div>
+          <div class="bomb-hint label-mono" id="bomb-hint">[4] PLANT | [5] DEFUSE</div>
+        </div>
+
+        <div class="hud-chat">
+          <div class="chat-log" id="chat-log"></div>
+          <div class="chat-input-row" id="chat-input-row">
+            <span class="chat-channel label-mono" id="chat-channel">[TEAM]</span>
+            <input type="text" id="chat-input" class="chat-input" placeholder="SAY:" maxlength="128" />
+          </div>
+        </div>
+
+        <div class="hud-bottom">
+          <div class="hud-vitals">
+            <div class="vital">
+              <span class="label-mono">HEALTH_STATUS</span>
+              <div class="vital-bar"><div class="vital-fill health" id="health-bar"></div></div>
+              <span class="vital-num" id="hud-health">100</span>
+            </div>
+            <div class="vital">
+              <span class="label-mono">ARMOR_INTEGRITY</span>
+              <div class="vital-bar"><div class="vital-fill armor" id="armor-bar"></div></div>
+              <span class="vital-num" id="hud-armor">0</span>
+            </div>
+          </div>
+          <div class="hud-weapon">
+            <div class="weapon-panel">
+              <div class="weapon-icon" id="weapon-icon">
+                <svg viewBox="0 0 80 40" class="weapon-svg" id="weapon-svg">
+                  <rect x="10" y="16" width="40" height="8" rx="1" fill="#3a3a3a"/>
+                  <rect x="48" y="17" width="22" height="5" rx="1" fill="#2a2a2a"/>
+                  <rect x="8" y="22" width="8" height="12" rx="1" fill="#4a3020"/>
+                </svg>
+              </div>
+              <div class="weapon-info">
+                <span class="label-mono">COMBAT_LOADOUT</span>
+                <div class="weapon-name" id="hud-weapon">GLOCK-18</div>
+                <div class="ammo-display">
+                  <div class="ammo-mag label-mono"><span id="hud-ammo">20</span></div>
+                  <div class="ammo-sep">/</div>
+                  <div class="ammo-reserve label-mono"><span id="hud-reserve">120</span></div>
+                </div>
+                <div class="ammo-bar"><div class="ammo-fill" id="ammo-bar-fill"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="crosshair"></div>
+      <div id="damage-numbers"></div>
+      <div id="game-message" class="game-message hidden"></div>
+    </section>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <div id="settings-menu" class="settings-menu hidden">
+    <div class="settings-header label-mono">SYSTEM PARAMETERS</div>
+    <button type="button" id="btn-restart-server" class="settings-item">
+      <span class="settings-icon">↻</span>
+      <span>REINICIAR SERVIDOR</span>
+    </button>
+    <button type="button" id="btn-reconnect-server" class="settings-item">
+      <span class="settings-icon">⟳</span>
+      <span>RECONECTAR</span>
+    </button>
+  </div>
+
+  <script src="env.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/network/socket.js"></script>
+  <script src="js/game/map-data.js"></script>
+  <script src="js/game/collision.js"></script>
+  <script src="js/game/textures.js"></script>
+  <script src="js/game/map.js"></script>
+  <script src="js/game/playerModels.js"></script>
+  <script src="js/game/playerAnimations.js"></script>
+  <script src="js/game/damageNumbers.js"></script>
+  <script src="js/game/shootEffects.js"></script>
+  <script src="js/game/viewmodel.js"></script>
+  <script src="js/game/renderer.js"></script>
+  <script src="js/game/controls.js"></script>
+  <script src="js/screens/menu.js"></script>
+  <script src="js/screens/teamSelect.js"></script>
+  <script src="js/screens/settings.js"></script>
+  <script src="js/screens/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

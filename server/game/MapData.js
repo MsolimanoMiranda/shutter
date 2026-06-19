@@ -1,0 +1,36 @@
+// Map collision data — keep in sync with client/js/game/map-data.js
+const MAP_WALLS = [
+  { x: 0, z: -45, w: 90, d: 2, h: 6 },
+  { x: 0, z: 45, w: 90, d: 2, h: 6 },
+  { x: -45, z: 0, w: 2, d: 90, h: 6 },
+  { x: 45, z: 0, w: 2, d: 90, h: 6 },
+  { x: 0, z: -15, w: 20, d: 2, h: 4 },
+  { x: 0, z: 15, w: 20, d: 2, h: 4 },
+  { x: -25, z: -30, w: 2, d: 25, h: 5 },
+  { x: -25, z: 10, w: 2, d: 25, h: 5 },
+  { x: 25, z: -30, w: 2, d: 20, h: 5 },
+  { x: 25, z: 20, w: 2, d: 15, h: 5 },
+  { x: -5, z: 0, w: 4, d: 4, h: 3 },
+  { x: 5, z: 0, w: 4, d: 4, h: 3 },
+  { x: 0, z: -5, w: 6, d: 3, h: 2.5 },
+  { x: 0, z: 8, w: 6, d: 3, h: 2.5 },
+  { x: -30, z: -20, w: 5, d: 5, h: 3 },
+  { x: -35, z: -10, w: 4, d: 4, h: 2 },
+  { x: -20, z: -25, w: 4, d: 4, h: 2.5 },
+  { x: 30, z: 25, w: 5, d: 5, h: 3 },
+  { x: 35, z: 15, w: 4, d: 4, h: 2 },
+  { x: 20, z: 30, w: 4, d: 4, h: 2.5 },
+  { x: 30, z: -20, w: 6, d: 3, h: 2 },
+  { x: 35, z: -30, w: 4, d: 4, h: 3 },
+  { x: -30, z: 20, w: 6, d: 3, h: 2 },
+  { x: -35, z: 30, w: 4, d: 4, h: 3 },
+];
+
+const BOMB_SITES = {
+  A: { x: -30, z: -15, radius: 6 },
+  B: { x: 30, z: 20, radius: 6 },
+};
+
+const PLAYER_RADIUS = 0.5;
+
+module.exports = { MAP_WALLS, BOMB_SITES, PLAYER_RADIUS };
