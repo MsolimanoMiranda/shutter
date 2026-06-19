@@ -825,38 +825,93 @@ html, body {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
+  width: 0;
+  height: 0;
   pointer-events: none;
   z-index: 5;
+  --spread: 4px;
+  --line-len: 11px;
+  --line-thick: 2px;
+  --ch-color: rgba(168, 184, 106, 0.92);
+  transform: translate(-50%, -50%);
+  will-change: transform;
 }
 
-#crosshair::before,
-#crosshair::after {
-  content: '';
+#crosshair .ch-line {
   position: absolute;
-  background: rgba(168, 184, 106, 0.75);
+  background: var(--ch-color);
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.65);
+  transition: background 0.12s, box-shadow 0.12s;
 }
 
-#crosshair::before {
+#crosshair .ch-top {
+  width: var(--line-thick);
+  height: var(--line-len);
+  left: calc(var(--line-thick) / -2);
+  bottom: calc(var(--spread) + 1px);
+  transform-origin: center bottom;
+}
+
+#crosshair .ch-bottom {
+  width: var(--line-thick);
+  height: var(--line-len);
+  left: calc(var(--line-thick) / -2);
+  top: calc(var(--spread) + 1px);
+  transform-origin: center top;
+}
+
+#crosshair .ch-left {
+  height: var(--line-thick);
+  width: var(--line-len);
+  top: calc(var(--line-thick) / -2);
+  right: calc(var(--spread) + 1px);
+  transform-origin: right center;
+}
+
+#crosshair .ch-right {
+  height: var(--line-thick);
+  width: var(--line-len);
+  top: calc(var(--line-thick) / -2);
+  left: calc(var(--spread) + 1px);
+  transform-origin: left center;
+}
+
+#crosshair .ch-dot {
+  position: absolute;
   width: 2px;
-  height: 12px;
-  top: 4px;
-  left: 9px;
-}
-
-#crosshair::after {
-  width: 12px;
   height: 2px;
-  top: 9px;
-  left: 4px;
+  left: -1px;
+  top: -1px;
+  border-radius: 50%;
+  background: var(--ch-color);
+  opacity: 0.85;
+  transition: opacity 0.15s, transform 0.1s;
 }
 
-#crosshair.kick {
-  transform: translate(-50%, -50%) scale(1.4);
-  transition: transform 0.08s ease-out;
+#crosshair.moving .ch-dot,
+#crosshair.jumping .ch-dot,
+#crosshair.tense .ch-dot {
+  opacity: 0;
+  transform: scale(0);
 }
+
+#crosshair.moving {
+  --ch-color: rgba(168, 184, 106, 0.78);
+}
+
+#crosshair.jumping {
+  --ch-color: rgba(255, 107, 0, 0.82);
+}
+
+#crosshair.shooting .ch-line {
+  background: rgba(255, 220, 160, 0.95);
+  box-shadow: 0 0 6px rgba(255, 140, 60, 0.45);
+}
+
+#crosshair.shooting .ch-top { transform: scaleY(0.82); }
+#crosshair.shooting .ch-bottom { transform: scaleY(0.82); }
+#crosshair.shooting .ch-left { transform: scaleX(0.82); }
+#crosshair.shooting .ch-right { transform: scaleX(0.82); }
 
 #damage-numbers {
   position: absolute;
@@ -881,6 +936,24 @@ html, body {
 .damage-num.kill {
   font-size: 1.4rem;
   color: #ff2222;
+}
+
+.damage-num.heal {
+  color: #44ff88;
+  text-shadow: 0 0 8px rgba(68,255,136,0.6), 0 2px 4px rgba(0,0,0,0.8);
+}
+
+#heal-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(68,255,136,0.25) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 6;
+  opacity: 0;
+}
+
+#heal-flash.active {
+  animation: damage-flash-pulse 0.4s ease-out;
 }
 
 #damage-flash {

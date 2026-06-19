@@ -26,6 +26,7 @@ const GameScreen = {
 
     this.renderer = new GameRenderer(this.canvas);
     DamageNumbers.init();
+    Crosshair.init();
     this.controls = new FPSControls(
       this.canvas,
       (data) => gameSocket.move(data),
@@ -52,6 +53,7 @@ const GameScreen = {
       }
     });
     gameSocket.on('shot', (data) => this.onShot(data));
+    gameSocket.on('healthPickup', (data) => this.onHealthPickup(data));
     gameSocket.on('chat', (msg) => this._addChatMessage(msg));
     gameSocket.on('serverError', (err) => {
       if (['NOT_IN_SITE', 'TOO_FAR', 'CANNOT_PLANT', 'CANNOT_DEFUSE'].includes(err.error)) {
@@ -149,6 +151,7 @@ const GameScreen = {
     this._updateBombHUD(state, me);
     this.renderer.syncPlayers(state.players, this.localId);
     this.renderer.syncBomb(state.bomb);
+    this.renderer.syncHealthPickups(state.healthPickups);
 
     if (state.chat?.length) {
       const currentCount = this.chatLog.children.length;
@@ -161,6 +164,7 @@ const GameScreen = {
       this.inGame = true;
       this._toggleBuy(true);
       this.controls.disable();
+      Crosshair.setVisible(false);
       document.getElementById('buy-timer').textContent = this._formatTime(state.timeLeft);
       document.getElementById('buy-money').textContent = me.money.toLocaleString();
       this._filterBuyItems(me.team);
@@ -168,6 +172,7 @@ const GameScreen = {
     } else if (state.phase === 'live') {
       this._toggleBuy(false);
       this.inGame = true;
+      Crosshair.setVisible(true);
       if (!this.chatOpen) this.controls.enable();
       this.controls.setPosition(me.x, me.y, me.z, me.rotY);
     } else if (state.phase === 'round_end') {
@@ -222,6 +227,32 @@ const GameScreen = {
     statusEl.textContent = status;
     fillEl.style.width = `${progress}%`;
     hintEl.textContent = hint;
+  },
+
+  onHealthPickup(data) {
+    DamageNumbers.spawnHeal(data.x, 1.15, data.z, data.amount, this.renderer.camera);
+
+    const pickupMesh = HealthPickups.meshes.get(data.pickupId);
+    if (pickupMesh) pickupMesh.visible = false;
+
+    if (data.playerId === this.localId) {
+      document.getElementById('hud-health').textContent = Math.round(data.health);
+      document.getElementById('health-bar').style.width = `${data.health}%`;
+      this._flashHeal();
+      this._showMessage(`+${data.amount} HP`, 1200);
+    }
+  },
+
+  _flashHeal() {
+    let flash = document.getElementById('heal-flash');
+    if (!flash) {
+      flash = document.createElement('div');
+      flash.id = 'heal-flash';
+      document.getElementById('screen-game').appendChild(flash);
+    }
+    flash.classList.remove('active');
+    void flash.offsetWidth;
+    flash.classList.add('active');
   },
 
   onShot(data) {
@@ -395,6 +426,7 @@ const GameScreen = {
   _toggleBuy(show) {
     this.buyScreen.classList.toggle('active', show);
     this.buyScreen.style.display = show ? 'flex' : 'none';
+    Crosshair.setVisible(!show && this.inGame);
   },
 
   _showMessage(text, duration = 3000) {
@@ -420,11 +452,18 @@ const GameScreen = {
   },
 
   _animate() {
+    const dt = Math.min(0.05, (performance.now() - (this._lastFrame || performance.now())) / 1000);
+    this._lastFrame = performance.now();
+
     if (this.inGame || this.controls.enabled) {
       const cam = this.controls.getCamera();
       this.renderer.setMoving(this.controls.isCurrentlyMoving());
       this.renderer.setJumping(this.controls.isJumping());
       this.renderer.updateLocalCamera(cam.x, cam.y, cam.z, cam.rotY, cam.rotX);
+      Crosshair.update(dt, {
+        moving: this.controls.isCurrentlyMoving(),
+        jumping: this.controls.isJumping(),
+      });
     }
     this.renderer.render();
     requestAnimationFrame(() => this._animate());

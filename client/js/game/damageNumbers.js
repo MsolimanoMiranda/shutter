@@ -30,6 +30,25 @@ const DamageNumbers = {
     this._updatePosition(item, camera);
   },
 
+  spawnHeal(worldX, worldY, worldZ, amount, camera) {
+    if (!this.container || !camera) return;
+    const el = document.createElement('div');
+    el.className = 'damage-num heal';
+    el.textContent = `+${Math.round(amount)}`;
+    this.container.appendChild(el);
+
+    const item = {
+      el,
+      x: worldX,
+      y: worldY + 1.8,
+      z: worldZ,
+      life: 1.2,
+      vy: 0.015,
+    };
+    this.items.push(item);
+    this._updatePosition(item, camera);
+  },
+
   _updatePosition(item, camera) {
     const v = new THREE.Vector3(item.x, item.y, item.z);
     v.project(camera);

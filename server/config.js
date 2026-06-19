@@ -17,6 +17,10 @@ const JUMP_FORCE = 6.8;
 const GRAVITY = 13.5;
 const AIR_CONTROL = 0.75;
 
+const HEALTH_PICKUP_RADIUS = 1.6;
+const HEALTH_PICKUP_AMOUNT = 50;
+const HEALTH_PICKUP_RESPAWN = 45;
+
 const TEAMS = {
   T: 'terrorist',
   CT: 'counter_terrorist',
@@ -68,6 +72,9 @@ module.exports = {
   JUMP_FORCE,
   GRAVITY,
   AIR_CONTROL,
+  HEALTH_PICKUP_RADIUS,
+  HEALTH_PICKUP_AMOUNT,
+  HEALTH_PICKUP_RESPAWN,
   TEAMS,
   SPAWN_POINTS,
   WEAPONS,

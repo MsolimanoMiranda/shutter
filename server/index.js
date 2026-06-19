@@ -102,6 +102,10 @@ io.on('connection', (socket) => {
     if (update) {
       socket.emit('playerMoved', update);
       socket.broadcast.emit('playerMoved', update);
+      if (update.heal) {
+        io.emit('healthPickup', update.heal);
+        io.emit('state', game.getState());
+      }
     }
   });
 

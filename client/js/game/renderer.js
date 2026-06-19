@@ -28,6 +28,7 @@ class GameRenderer {
 
     setupLighting(this.scene);
     buildMap(this.scene);
+    HealthPickups.init(this.scene);
     this._createBombMesh();
 
     this.camera.position.set(0, 1.6, 0);
@@ -147,6 +148,10 @@ class GameRenderer {
     }
   }
 
+  syncHealthPickups(pickups) {
+    HealthPickups.sync(pickups);
+  }
+
   updateRemotePlayer(data) {
     const meta = this.playerMeta.get(data.id) || { prevX: data.x, prevZ: data.z, lastMove: performance.now() };
     const dist = Math.hypot(data.x - meta.prevX, data.z - meta.prevZ);
@@ -222,6 +227,7 @@ class GameRenderer {
     const elapsed = this.clock.elapsedTime * 1000;
     this._interpolateRemotes(dt);
     animateDust(this.scene, elapsed);
+    HealthPickups.animate(elapsed);
     updateViewmodel(this.viewmodel, elapsed, this.isMoving, this.isJumping);
     applyRecoil(this.viewmodel);
     DamageNumbers.update(this.camera, dt);

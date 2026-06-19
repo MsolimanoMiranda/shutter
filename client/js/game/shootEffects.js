@@ -92,10 +92,5 @@ function _screenFlash() {
 }
 
 function _crosshairKick() {
-  const ch = document.getElementById('crosshair');
-  if (!ch) return;
-  ch.classList.remove('kick');
-  void ch.offsetWidth;
-  ch.classList.add('kick');
-  setTimeout(() => ch.classList.remove('kick'), 120);
+  Crosshair.onShoot();
 }

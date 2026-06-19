@@ -16,8 +16,11 @@ const {
   JUMP_FORCE,
   GRAVITY,
   WEAPONS,
+  HEALTH_PICKUP_RADIUS,
+  HEALTH_PICKUP_AMOUNT,
+  HEALTH_PICKUP_RESPAWN,
 } = require('../config');
-const { BOMB_SITES } = require('./MapData');
+const { BOMB_SITES, HEALTH_PICKUP_SPAWNS } = require('./MapData');
 const { moveWithCollision, distanceToPoint } = require('./Collision');
 const { createPlayer, spawnPlayer, serializePlayer } = require('./Player');
 
@@ -57,6 +60,69 @@ class GameServer {
     this.chatHistory = [];
     this.roundEndReason = null;
     this.physicsInterval = null;
+    this.healthPickups = this._createHealthPickups();
+  }
+
+  _createHealthPickups() {
+    return HEALTH_PICKUP_SPAWNS.map((spawn, id) => ({
+      id,
+      x: spawn.x,
+      z: spawn.z,
+      active: true,
+      respawnAt: 0,
+    }));
+  }
+
+  _resetHealthPickups() {
+    for (const pickup of this.healthPickups) {
+      pickup.active = true;
+      pickup.respawnAt = 0;
+    }
+  }
+
+  _respawnHealthPickups() {
+    const now = Date.now();
+    for (const pickup of this.healthPickups) {
+      if (!pickup.active && pickup.respawnAt > 0 && now >= pickup.respawnAt) {
+        pickup.active = true;
+        pickup.respawnAt = 0;
+      }
+    }
+  }
+
+  _checkHealthPickups(player) {
+    if (!player.alive || player.health >= 100) return null;
+
+    for (const pickup of this.healthPickups) {
+      if (!pickup.active) continue;
+      const dist = distanceToPoint(player.x, player.z, pickup.x, pickup.z);
+      if (dist > HEALTH_PICKUP_RADIUS) continue;
+
+      const amount = Math.min(HEALTH_PICKUP_AMOUNT, 100 - player.health);
+      player.health = Math.min(100, player.health + amount);
+      pickup.active = false;
+      pickup.respawnAt = Date.now() + HEALTH_PICKUP_RESPAWN * 1000;
+
+      return {
+        pickupId: pickup.id,
+        playerId: player.id,
+        playerName: player.name,
+        amount,
+        health: player.health,
+        x: pickup.x,
+        z: pickup.z,
+      };
+    }
+    return null;
+  }
+
+  getHealthPickupsState() {
+    return this.healthPickups.map((p) => ({
+      id: p.id,
+      x: p.x,
+      z: p.z,
+      active: p.active,
+    }));
   }
 
   getState() {
@@ -83,6 +149,7 @@ class GameServer {
         carrierName: carrier?.name || null,
       },
       chat: this.chatHistory.slice(-20),
+      healthPickups: this.getHealthPickupsState(),
       players: [...this.players.values()].map(serializePlayer),
     };
   }
@@ -175,6 +242,7 @@ class GameServer {
     }
 
     this._assignBombCarrier();
+    this._resetHealthPickups();
     this.startTick();
     return this.getState();
   }
@@ -246,6 +314,7 @@ class GameServer {
   tick() {
     if (this.phase === PHASE.LIVE) {
       this._processBombActions();
+      this._respawnHealthPickups();
     }
 
     this.timeLeft -= 1;
@@ -436,7 +505,17 @@ class GameServer {
       }
     }
 
-    return { id: player.id, x: player.x, y: player.y, z: player.z, rotY: player.rotY, rotX: player.rotX };
+    const heal = this._checkHealthPickups(player);
+
+    return {
+      id: player.id,
+      x: player.x,
+      y: player.y,
+      z: player.z,
+      rotY: player.rotY,
+      rotX: player.rotX,
+      heal,
+    };
   }
 
   shoot(socketId) {
@@ -602,6 +681,7 @@ class GameServer {
     this.bomb = createBombState();
     this.chatHistory = [];
     this.roundEndReason = null;
+    this._resetHealthPickups();
 
     for (const player of this.players.values()) {
       player.team = null;

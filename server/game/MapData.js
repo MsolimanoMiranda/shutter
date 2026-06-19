@@ -31,6 +31,21 @@ const BOMB_SITES = {
   B: { x: 30, z: 20, radius: 6 },
 };
 
+// Posiciones en zonas abiertas del mapa (sincronizar con client/js/game/map-data.js)
+const HEALTH_PICKUP_SPAWNS = [
+  { x: 0, z: 2 },
+  { x: -14, z: -18 },
+  { x: 14, z: 18 },
+  { x: -10, z: 22 },
+  { x: 10, z: -22 },
+  { x: -32, z: 5 },
+  { x: 32, z: -8 },
+  { x: 0, z: -32 },
+  { x: 0, z: 32 },
+  { x: -20, z: 0 },
+  { x: 20, z: 0 },
+];
+
 const PLAYER_RADIUS = 0.5;
 
-module.exports = { MAP_WALLS, BOMB_SITES, PLAYER_RADIUS };
+module.exports = { MAP_WALLS, BOMB_SITES, HEALTH_PICKUP_SPAWNS, PLAYER_RADIUS };
