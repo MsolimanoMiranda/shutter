@@ -3,17 +3,27 @@ frontend:
   phases:
     preBuild:
       commands:
-        - echo "Injecting game server URL"
+        - echo "Injecting game server URL into client/env.js"
         - |
+          cat > client/env.js << 'ENVJS'
+          function resolveServerUrl() {
+            if (window.GAME_SERVER_URL) return window.GAME_SERVER_URL;
+            const host = window.location.hostname || 'localhost';
+            if (host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '[::1]') {
+              return `http://${host === '::1' || host === '[::1]' ? 'localhost' : host}:3001`;
+            }
+            return `http://${host}:3001`;
+          }
+          ENVJS
           if [ -n "$GAME_SERVER_URL" ]; then
-            echo "window.GAME_SERVER_URL = '$GAME_SERVER_URL';" > client/env.js
+            echo "window.GAME_SERVER_URL = '$GAME_SERVER_URL';" >> client/env.js
           else
-            echo "window.GAME_SERVER_URL = '';" > client/env.js
-            echo "WARNING - Set GAME_SERVER_URL in Amplify environment variables"
+            echo "window.GAME_SERVER_URL = window.GAME_SERVER_URL || resolveServerUrl();" >> client/env.js
+            echo "WARNING: Set GAME_SERVER_URL in Amplify environment variables (your App Runner HTTPS URL)"
           fi
     build:
       commands:
-        - echo "Static client — no build required"
+        - echo "Static client - no build required"
   artifacts:
     baseDirectory: client
     files:

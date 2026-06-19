@@ -1,5 +1,7 @@
 const express = require('express');
 const http = require('http');
+const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
 const { Server } = require('socket.io');
 const { GameServer } = require('./game/GameServer');
@@ -7,8 +9,13 @@ const { MAX_PLAYERS, MAP_NAME } = require('./config');
 
 const PORT = process.env.PORT || 3001;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
+const CLIENT_DIR = path.resolve(__dirname, '..', 'client');
 
 const app = express();
+if (process.env.NODE_ENV === 'production' || process.env.TRUST_PROXY === '1') {
+  app.set('trust proxy', 1);
+}
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: CORS_ORIGIN, methods: ['GET', 'POST'] },
@@ -161,6 +168,15 @@ io.on('connection', (socket) => {
   });
 });
 
+if (fs.existsSync(CLIENT_DIR)) {
+  app.use(express.static(CLIENT_DIR));
+  app.get('*', (req, res, next) => {
+    if (req.method !== 'GET') return next();
+    if (req.path.startsWith('/api') || req.path === '/health') return next();
+    res.sendFile(path.join(CLIENT_DIR, 'index.html'));
+  });
+}
+
 setInterval(() => {
   if (['live', 'buy', 'round_end'].includes(game.phase)) {
     io.emit('state', game.getState());
@@ -169,6 +185,11 @@ setInterval(() => {
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`[COUNTER_STRYKE] Servidor activo en puerto ${PORT}`);
-  console.log(`[COUNTER_STRYKE] Mapa: ${MAP_NAME} | Máx jugadores: ${MAX_PLAYERS}`);
+  console.log(`[COUNTER_STRYKE] Mapa: ${MAP_NAME} | Max jugadores: ${MAX_PLAYERS}`);
   console.log(`[COUNTER_STRYKE] Health: http://localhost:${PORT}/health`);
+  if (fs.existsSync(CLIENT_DIR)) {
+    console.log(`[COUNTER_STRYKE] Cliente web: http://localhost:${PORT}/`);
+  } else {
+    console.warn(`[COUNTER_STRYKE] Carpeta client/ no encontrada — solo API`);
+  }
 });

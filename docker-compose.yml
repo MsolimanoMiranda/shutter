@@ -1,0 +1,12 @@
+services:
+  counter-stryke:
+    build: .
+    container_name: counter-stryke
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3001}:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      TRUST_PROXY: "1"
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}

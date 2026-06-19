@@ -1,8 +1,3 @@
-# Build desde la raiz del repo:
-#   docker build -f server/Dockerfile .
-#
-# O usa el Dockerfile en la raiz: docker build .
-
 FROM node:20-alpine
 
 WORKDIR /app

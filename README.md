@@ -8,24 +8,135 @@ Juego web multijugador inspirado en Counter-Strike 1.6. Un servidor, un mapa (DE
 |------|-----------|
 | Servidor de juego | Node.js + Express + Socket.io |
 | Cliente | HTML/CSS/JS + Three.js |
-| Hosting frontend | AWS Amplify |
-| Hosting servidor | AWS App Runner (recomendado) |
+| Producción | VPS (un solo proceso: web + juego) |
 
 ## Inicio rápido (local)
 
 ```bash
-# Instalar dependencias
 npm run install:all
-
-# Iniciar servidor + cliente
 npm run dev
 ```
 
-- **Cliente:** http://localhost:3000
-- **Servidor:** http://localhost:3001
-- **Health check:** http://localhost:3001/health
+- **Desarrollo:** cliente en http://localhost:3000 y servidor en http://localhost:3001
+- **Producción / VPS:** todo en un solo puerto → http://tu-servidor:3001
+- **Health check:** `/health`
 
 Abre varias pestañas del navegador para probar multijugador.
+
+## Despliegue en VPS (recomendado)
+
+Un solo servicio sirve el juego **y** el cliente. No necesitas Amplify ni dos servidores.
+
+```
+Internet → Nginx (80/443) → Node.js :3001
+                              ├── client/  (HTML, JS, assets)
+                              └── Socket.io (multijugador)
+```
+
+### 1. Subir el proyecto al VPS
+
+```bash
+# En tu máquina
+git clone <tu-repo> counter-stryke
+# o: scp -r ./retro usuario@TU_IP:/opt/counter-stryke
+```
+
+### 2. Instalar en el VPS
+
+```bash
+ssh usuario@TU_IP
+cd /opt/counter-stryke   # o la ruta donde subiste el proyecto
+
+npm run vps:install
+```
+
+Requisitos: **Node.js 20+**, puerto **3001** abierto en el firewall.
+
+### 3. Arrancar el juego
+
+**Opción A — Prueba rápida**
+
+```bash
+npm run start:prod
+# Abre http://TU_IP:3001
+```
+
+**Opción B — PM2 (recomendado)**
+
+```bash
+npm install -g pm2
+pm2 start deploy/ecosystem.config.cjs
+pm2 save
+pm2 startup   # sigue las instrucciones para auto-arranque
+```
+
+**Opción C — Docker**
+
+```bash
+docker compose up -d --build
+```
+
+### 4. Nginx + dominio + HTTPS (producción)
+
+```bash
+sudo apt install nginx certbot python3-certbot-nginx
+sudo cp deploy/nginx.conf.example /etc/nginx/sites-available/counter-stryke
+# Edita server_name con tu dominio
+sudo ln -s /etc/nginx/sites-available/counter-stryke /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d tu-dominio.com
+```
+
+Abre **https://tu-dominio.com** — el cliente detecta el servidor automáticamente (mismo origen).
+
+### 5. Firewall (UFW)
+
+```bash
+sudo ufw allow OpenSSH
+sudo ufw allow 'Nginx Full'   # si usas nginx
+# o solo el puerto directo:
+# sudo ufw allow 3001/tcp
+sudo ufw enable
+```
+
+### Variables de entorno
+
+Copia `.env.example` a `.env` si quieres personalizar:
+
+| Variable | Default | Descripción |
+|----------|---------|-------------|
+| `PORT` | `3001` | Puerto del servidor |
+| `CORS_ORIGIN` | `*` | Origen CORS (con mismo dominio no importa mucho) |
+| `TRUST_PROXY` | `1` | Activo detrás de nginx |
+| `NODE_ENV` | `production` | Modo producción |
+
+### Verificar
+
+- `curl http://localhost:3001/health` → `{"status":"ok",...}`
+- Abre la URL en el navegador → **SERVER STATUS: ONLINE**
+- Segunda pestaña/incógnito → segundo jugador
+
+---
+
+## Despliegue AWS (opcional, 2 servicios)
+
+Si prefieres Amplify + App Runner en lugar de un VPS, el frontend y el servidor van separados. Ver `amplify.yml` y desplegar `server/` con Docker en App Runner. Para la mayoría de casos, **VPS es más simple**.
+
+## Estructura del proyecto
+
+```
+counter-stryke/
+├── Dockerfile           # Imagen Docker (client + server)
+├── docker-compose.yml
+├── deploy/
+│   ├── ecosystem.config.cjs   # PM2
+│   ├── nginx.conf.example
+│   └── install-vps.sh
+├── client/              # Frontend (servido por Express en producción)
+└── server/              # Node.js + Socket.io
+    ├── index.js
+    └── game/
+```
 
 ## Controles
 
@@ -48,73 +159,6 @@ Abre varias pestañas del navegador para probar multijugador.
 2. **Selección de equipo** — Terroristas (naranja) o Counter-Terroristas (verde), máx. 5 por lado
 3. **Fase de compra** — 15 segundos para comprar armas y equipo
 4. **Combate** — Rondas de 115 segundos, primer equipo a 16 victorias gana
-
-## Despliegue en AWS
-
-### Arquitectura
-
-```
-[Amplify] ── frontend estático (client/)
-     │
-     └── WebSocket ──► [App Runner] ── Node.js + Socket.io (server/)
-```
-
-> **Importante:** Amplify hospeda el frontend estático. El servidor de juego con WebSockets debe desplegarse por separado (App Runner, ECS o EC2).
-
-### 1. Desplegar el servidor (App Runner)
-
-```bash
-cd server
-
-# Construir y subir imagen a ECR, luego crear servicio App Runner
-docker build -t counter-stryke-server .
-```
-
-Configura en App Runner:
-- **Puerto:** 3001
-- **Variable de entorno:** `CORS_ORIGIN=https://tu-dominio.amplifyapp.com`
-
-### 2. Desplegar el frontend (Amplify)
-
-1. Conecta este repositorio en [AWS Amplify Console](https://console.aws.amazon.com/amplify/)
-2. Amplify detectará `amplify.yml` automáticamente
-3. Agrega variable de entorno en Amplify:
-
-```
-GAME_SERVER_URL = https://tu-servidor.apprunner.aws
-```
-
-4. En `client/index.html`, agrega antes de los scripts:
-
-```html
-<script src="env.js"></script>
-```
-
-### 3. Verificar
-
-- Abre tu URL de Amplify
-- El menú debe mostrar **SERVER STATUS: ONLINE**
-- Abre otra pestaña/incógnito para unirse como segundo jugador
-
-## Estructura del proyecto
-
-```
-counter-stryke/
-├── amplify.yml          # Config Amplify (frontend)
-├── client/              # Frontend estático
-│   ├── index.html
-│   ├── css/styles.css
-│   └── js/
-│       ├── game/        # Three.js renderer, mapa, controles
-│       ├── screens/     # Menú, equipos, juego
-│       └── network/     # Socket.io client
-└── server/              # Servidor de juego
-    ├── index.js
-    ├── Dockerfile
-    └── game/
-        ├── GameServer.js
-        └── Player.js
-```
 
 ## API
 
